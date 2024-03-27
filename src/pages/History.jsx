@@ -14,7 +14,7 @@ function History() {
   const profile = useCurrentProfile()
   const profileId = profile?.id;
   const { isLoading, isError, error, data } = useQuery(
-    ['LikedVideos', profileId], () => getLikedVideos(profileId),
+    ['History', profileId], () => getHistoryVideos(profileId),
     {
       enable: !!profile,
     }
@@ -24,7 +24,7 @@ function History() {
     return <SignUpCard 
     icon={<HistoryIcon />}
     title="keep track of what you watch"
-    description="Watch history isn't viewable when signed"
+    description="Watch history isn't viewable when signed out"
 
     />
   }

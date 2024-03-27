@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { queryClient } from "../components/AppProviders";
 import comment from "postcss/lib/comment";
+import uniqBy from "lodash.uniqby"
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -73,7 +74,12 @@ export async function getChannelSuggestions(profileId) {
     return data;
 }
 
-export function getHistoryVideos() {}
+export async function getHistoryVideos(profileId) {
+    const { data: views } = await supabase.from('view')
+            .select('*, video(*, profile(*), view(count))')
+            .eq('profile_id', profileId);
+    return uniqBy(views.map(view => view.video), 'id')
+}
 
 export async function getVideo(videoId) {
     const {data, error} = await supabase
@@ -112,7 +118,19 @@ export async function addVideo(video) {
     await supabase.from("video").insert([video]);
 }
 
-export function getChannel() {}
+export async function getChannel(profileId) {
+    const { data } = await supabase.from('profile')
+        .select('*, video(*, view(count)), public_subscription_subscriber_id_fkey(*, profile!public_subscription_subscribed_to_id_fkey(*)), public_subscription_subscribed_to_id_fkey(*,profile!public_subscription_subscribed_to_id_fkey(*))'
+    ) 
+    .eq("id", profileId)
+    .single();
+    const subscribers = data.public_subscription_subscriber_id_fkey;
+    const subscriptions = data.public_subscription_subscribed_to_id_fkey;
+    const subscriberCount = subscriptions.length;
+    delete data.public_subscription_subscriber_id_fkey;
+    delete data.public_subscription_subscribed_to_id_fkey;
+    return { ...data, subscriptions, subscribers, subscriberCount };
+}
 
 export async function addVideoView(view) {
     return await supabase.from('view').insert([view])
@@ -123,7 +141,16 @@ export async function addComment(comment) {
     await queryClient.invalidateQueries(["WatchVideo"])
 }
 
-export function searchVideosAndProfiles() {}
+export async function searchVideosAndProfiles(searchQuery) {
+    const { data: videos } = await supabase
+        .from('video')
+        .select("*, profile(*), view(count)")
+        .ilike("title", `%${searchQuery}%`);
+    const { data: profiles } =  await supabase.from('profile')
+            .select('*, public_subscription_subscribed_to_id_fkey(count), video(count)')
+            .ilike('username', `%${searchQuery}%`);
+        return {videos, profiles}
+}
 
 export async function likeVideo(profile, videoId) {
     const { data: likes } = await supabase.from("like")
@@ -204,9 +231,16 @@ export async function toggleSubscribeUser(profile, subscribedToId) {
     await queryClient.invalidateQueries(["SearchResults"]);
 }
 
-export function uploadImage() {}
+export async function uploadImage(file) {
+    await supabase.storage.from('images').upload(file.name, file)
+    const { data } = await supabase.storage.from('images').getPublicUrl(file.name)
+    return data.publicUrl
+}
 
-export function updateProfile() {}
+export async function updateProfile(profile) {
+    await supabase.from("profile").update(profile).eq("id", profile.id);
+    await queryClient.invalidateQueries(["Channel"])
+}
 
 export async function deleteVideo(videoId) {
     await supabase.from('video').delete().eq('id', videoId)

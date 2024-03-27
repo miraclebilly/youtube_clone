@@ -14,11 +14,37 @@ const StyledChannels = styled.div`
 `;
 
 function SearchResults() {
+  const {searchQuery} = useParams();
+  const { isLoading, isError, isSuccess, error, data } = useQuery(
+    ['SearchResults', searchQuery], () => 
+    searchVideosAndProfiles(searchQuery), {
+    enabled: !!searchQuery
+  })
+
+  if (isLoading) return <Skeleton />
+  if (isError) return <ErrorMessage error={error} />
+  if (isSuccess && !data.videos?.length && !data.profiles?.length) {
+    return (
+      <NoResults
+        title="No results found"
+        text="Try different keywords or remove search filters"
+      />
+    )
+  }
+
+  
+
   return (
     <Wrapper>
       <h2>Search Results</h2>
-      <StyledChannels>{/* Profile Search Results */}</StyledChannels>
-      {/* Video Search Results */}
+      <StyledChannels>
+        {data.profiles?.map(channel => (
+          <ChannelInfo key={channel.id} channel={channel} />
+        ))}
+      </StyledChannels>
+      {data.videos?.map(video => (
+        <TrendingCard key={video.id} video={video} />
+      ))}
     </Wrapper>
   );
 }
