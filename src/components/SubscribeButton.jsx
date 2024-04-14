@@ -16,9 +16,7 @@ function SubscribeButton({ subscribedToId }) {
     }
   }
 
-
   return (
-    
   <Button onClick={handleClick} grey={isSubscribed}>
     {isSubscribed ? "Subscribed" : "Subscribe"}
   </Button>

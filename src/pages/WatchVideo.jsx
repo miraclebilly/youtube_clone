@@ -23,6 +23,7 @@ import videojs from "video.js";
 function WatchVideoPage() {
   const { videoId } = useParams()
   const profile = useCurrentProfile();
+  
   const profileId = profile?.id;
   const { isLoading: isLoadingVideo, data: video } = useQuery(['WatchVideo', videoId], 
         () => getVideo(videoId))
@@ -34,6 +35,8 @@ function WatchVideoPage() {
         ['WatchVideo', 'Up Next'], 
         getVideos
   )
+ 
+  const subscriptionCount = profile?.subscriptions.length;
 
   function handleLikeVideo() {
     if (!profile) {
@@ -60,6 +63,7 @@ function WatchVideoPage() {
   }
 
   const isVideoMine = video.profile.id === profileId;
+  const videoCount = video.view[0].count
 
   return (
     <Wrapper filledLike={likes.isLiked} filledDislike={likes.isDisliked}>
@@ -73,7 +77,7 @@ function WatchVideoPage() {
 
           <div className="video-info-stats">
             <p>
-              <span>{video.view[0].count} views</span> <span>•</span>{" "}
+              <span>{videoCount} {videoCount > 0 ? "views" : "view"}</span> <span>•</span>{" "}
               <span>Published {formatCreatedAt(video.created_at)}</span>
             </p>
 
@@ -97,7 +101,7 @@ function WatchVideoPage() {
                   <Link to={`/channel/${video.profile_id}`}>{video.profile.username}</Link>
                 </h4>
                 <span className="secondary small">
-                  { } subscribers
+                  {subscriptionCount} {subscriptionCount > 1 ? "subscribers": "subscriber"}
                 </span>
               </div>
             </div>

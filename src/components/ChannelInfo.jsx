@@ -6,7 +6,8 @@ import SubscribeButton from "./SubscribeButton";
 function ChannelInfo({ channel }) {
   const profile = useCurrentProfile()
   const isMe = channel.id === profile?.id;
-
+  const subscribersCount = channel.public_subscription_subscribed_to_id_fkey[0].count;
+  
   return (
     <Wrapper>
       <Link to={`/channel/${channel.id}`} 
@@ -15,7 +16,7 @@ function ChannelInfo({ channel }) {
         <div className="channel-info-meta">
           <h3>{channel.username}</h3>
           <p className="secondary">
-            <span>{channel.public_subscription_subscribed_to_id_fkey[0].count}
+            <span>{subscribersCount}
               {" "}subscribers</span> <span className="to-hide">•</span>{" "}
             <span className="to-hide">{channel.video[0].count} videos</span>
           </p>

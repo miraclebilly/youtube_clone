@@ -46,7 +46,6 @@ function Channel() {
 
   const isMe = profile?.id === data?.id ;
 
-
   return (
     <Wrapper editProfile={isMe}>
       <div className="cover">
@@ -59,7 +58,7 @@ function Channel() {
             <img className="avatar lg" src={data.avatar} alt="channel avatar" />
             <div>
               <h3>{data.username}</h3>
-              <span className="secondary">{data.subscriberCount} subscribers</span>
+              <span className="secondary">{data.subscriberCount} {data.subscriberCount > 1 ? "subscribers" : "subscriber"}</span>
             </div>
           </div>
 

@@ -29,9 +29,14 @@ function AddComment({ video }) {
     }
   }
 
+  const commentCount = video.comment?.length;
+
   return (
     <Wrapper>
-      <h3>{video.comment?.length} comments</h3>
+      {commentCount === 0 && 
+        <h3>Add Comment(s)</h3>}
+      {commentCount > 0 && 
+        <h3>{commentCount} {commentCount > 1 ? "Comments": commentCount === 1 ? "Comment": "Add Comment"}</h3>}
 
       <div className="add-comment">
         {profile ? (
