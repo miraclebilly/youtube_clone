@@ -23,9 +23,13 @@ function AddComment({ video }) {
         video_id: video?.id,
         profile_id: profile?.id,
       }
-      await addComment(comment)
+      if(profile){
+        await addComment(comment)
         .then(() => setText(''))
         .catch(() => toast.error("Error adding a comment"))
+      } else {
+        toast.error("Signin to Make Comment")
+      }     
     }
   }
 
